@@ -51,9 +51,14 @@
     kernelPackages = pkgs.linuxPackages_zen;
 
     loader = {
-      systemd-boot.enable = true;
+      grub.enable = true;
+      grub.devices = [ "$BOOT_DEVICE" ];
+      grub.efiSupport = true;
+      grub.efiInstallAsRemovable = true;
       efi.canTouchEfiVariables = true;
+      efi.efiSysMountPoint = "/boot";
     };
+
   };
 
   time.timeZone = lib.mkDefault "America/Toronto";

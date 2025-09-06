@@ -1,4 +1,3 @@
-#!/bin/bash
 set -euo pipefail
 
 # --- Ensure running as root ---
@@ -18,6 +17,13 @@ done < <(lsblk -ndo NAME,SIZE,TYPE)
 if [ ${#DISK_MENU[@]} -eq 0 ]; then
   echo "No disks detected!"
   exit 1
+fi
+
+GREETING=$(dialog --stdout --title "BBBOS Installer" --menu "Weclome to the BigBoxOS Installer" 15 50 5 "Continue" "Install to Disk" "Exit" "Get outta here")
+
+if [ "$GREETING" == "Exit" ] || [ -n "$GREETING"]; then
+    clear
+    echo "Idk what you expected but get out/reboot"; exit 1;
 fi
 
 DISK=$(dialog --stdout \
@@ -71,13 +77,9 @@ fi
 nixos-generate-config --root /mnt
 
 cp -r /etc/installer/src/* /mnt/etc/nixos/
-
-# --- Optional: replace hardware config ---
-if [ -n "${PROFILE:-}" ]; then
-  cp "/profiles/${PROFILE}.nix" /mnt/etc/nixos/system/hardware-configuration.nix
-fi
+mv /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/system/hardware-configuration.nix
 
 # --- Install from baked flake ---
-nixos-install --flake /etc/installer/src#bbos
+nixos-install --flake /mnt/etc/nixos#bbos
 
 dialog --msgbox "Installation complete! Reboot now." 10 40
