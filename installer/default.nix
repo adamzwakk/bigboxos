@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, cfg, ... }:
 
 {
   # Temporary root to satisfy ISO build
@@ -32,7 +32,12 @@
   services.getty.autologinOnce = false;
 
   #isoImage.splashImage = ./img/wallpaper_8191_800x600.jpg;
-  isoImage.configurationName = "BigBoxOS Installer";
+  system.nixos.distroName = "BigBoxOS";
+  system.nixos.label = "Installer";
+  isoImage = {
+    appendToMenuLabel = "";
+  };
+
   systemd.services = {
     #systemd-networkd-wait-online.enable = true;
     "getty@tty1".enable = false;

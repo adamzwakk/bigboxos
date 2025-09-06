@@ -1,12 +1,11 @@
 set -euo pipefail
 
-# --- Ensure running as root ---
 if [ "$EUID" -ne 0 ]; then
     echo "This script must be run as root!"
     exit 1
 fi
 
-# --- List available disks ---
+### GET DISK INFO ###
 DISK_MENU=()
 while read -r name size type; do
   if [ "$type" = "disk" ]; then
@@ -33,54 +32,43 @@ DISK=$(dialog --stdout \
 
 [ -n "$DISK" ] || { echo "No disk selected, exiting."; exit 1; }
 
-# --- Confirm erase ---
 dialog --yesno "WARNING: This will ERASE ALL DATA on $DISK. Continue?" 10 50 || exit 1
 
-# --- Partitioning (UEFI aware) ---
-UEFI_BOOT=0
-if [ -d /sys/firmware/efi ]; then
-  UEFI_BOOT=1
-fi
+### ERASE/PARTITION DISKS ###
 
-# Wipe disk
 sgdisk --zap-all "$DISK"
 
-if [ "$UEFI_BOOT" -eq 1 ]; then
-  parted --script "$DISK" \
+ROOT_SIZE=30GiB
+
+parted --script "$DISK" \
     mklabel gpt \
     mkpart ESP fat32 1MiB 513MiB \
     set 1 boot on \
-    mkpart nixos ext4 513MiB 100%
-else
-  parted --script "$DISK" mklabel gpt mkpart nixos ext4 1MiB 100%
-fi
+    mkpart nixos ext4 513MiB "$ROOT_SIZE" \
+    mkpart home ext4 "$ROOT_SIZE" 100%
 
 partprobe "$DISK"
 udevadm settle
 
 # --- Format partitions ---
-if [ "$UEFI_BOOT" -eq 1 ]; then
-  mkfs.fat -F32 /dev/disk/by-partlabel/ESP
-fi
+mkfs.fat -F32 /dev/disk/by-partlabel/ESP
 mkfs.ext4 -L nixos /dev/disk/by-partlabel/nixos
+mkfs.ext4 -L home /dev/disk/by-partlabel/home
 
 udevadm settle
 
-# --- Mount ---
 mount /dev/disk/by-label/nixos /mnt
-if [ "$UEFI_BOOT" -eq 1 ]; then
-  mkdir -p /mnt/boot
-  mount /dev/disk/by-partlabel/ESP /mnt/boot
-fi
+mkdir -p /mnt/boot
+mount /dev/disk/by-partlabel/ESP /mnt/boot
+mkdir -p /mnt/home
+mount /dev/disk/by-label/home /mnt/home
 
-# --- Generate NixOS config ---
 nixos-generate-config --root /mnt
 
 cp -r /etc/installer/src/* /mnt/etc/nixos/
 mv /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/system/hardware-configuration.nix
 
-# --- Install from baked flake ---
 nixos-install --flake /mnt/etc/nixos#bbos
 
-dialog --msgbox "Installation complete! I'm gonna reboot now." 10 40
+dialog --msgbox "Installation complete! I'm gonna reboot when you say so." 10 40
 reboot

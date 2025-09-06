@@ -112,7 +112,10 @@
 
   hardware.enableRedistributableFirmware = true;
 
-  networking.firewall.enable = true;
+  networking = {
+    firewall.enable = true;
+    hostName = "bbos";
+  };
 
   environment = {
     systemPackages = with pkgs; [
