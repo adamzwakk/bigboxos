@@ -82,4 +82,5 @@ mv /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/system/hardware-conf
 # --- Install from baked flake ---
 nixos-install --flake /mnt/etc/nixos#bbos
 
-dialog --msgbox "Installation complete! Reboot now." 10 40
+dialog --msgbox "Installation complete! I'm gonna reboot now." 10 40
+reboot

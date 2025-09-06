@@ -51,10 +51,7 @@
     kernelPackages = pkgs.linuxPackages_zen;
 
     loader = {
-      grub.enable = true;
-      grub.devices = [ "$BOOT_DEVICE" ];
-      grub.efiSupport = true;
-      grub.efiInstallAsRemovable = true;
+      systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
       efi.efiSysMountPoint = "/boot";
     };
