@@ -5,6 +5,11 @@
   flake-inputs,
   ...
 }:
+let
+  hardwareconfig = if builtins.pathExists ./hardware-configuration.nix
+    then ./hardware-configuration.nix
+    else ./vm-hardware.nix;
+in
 {
   imports = [
     flake-inputs.home-manager.nixosModules.home-manager
@@ -16,7 +21,7 @@
 
     ./users/bbadmin.nix
 
-    ./hardware-configuration.nix
+    hardwareconfig
   ];
 
   nix = {
@@ -108,6 +113,8 @@
 
     udisks2.enable = true;
     automatic-timezoned.enable = true;
+
+    getty.autologinUser = "bbadmin";
   };
 
   hardware.enableRedistributableFirmware = true;
@@ -148,8 +155,6 @@
       # To prevent firefox from creating ~/Desktop.
       XDG_DESKTOP_DIR = "$HOME";
       EDITOR = "nano";
-      BROWSER = "firefox";
-      TERMINAL = "alacritty";
 
       NIXOS_OZONE_WL = "1";
     };

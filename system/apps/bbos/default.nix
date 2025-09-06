@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }:
 {
@@ -8,4 +9,13 @@
   environment.systemPackages = with pkgs; [
     cage                # Kiosk Mode
   ];
+
+
+  home-manager.users.bbadmin = {
+    home.packages = with pkgs; [ 
+      #yazi
+    ];
+
+    home.stateVersion = "25.05";
+  };
 }
