@@ -20,6 +20,7 @@ in
     ./apps/runtimes      # Runtimes are always global
 
     ./users/bbadmin.nix
+    ./users/bbuser.nix
 
     hardwareconfig
   ];
@@ -37,7 +38,7 @@ in
       trusted-users = ["bbadmin"];
       sandbox = "relaxed";
       auto-optimise-store = true;
-      allowed-users = ["bbadmin"];             # My god it took me hours to realize you need the user here for home manager to work
+      allowed-users = ["bbadmin" "bbuser"];             # My god it took me hours to realize you need the user here for home manager to work
       experimental-features = "nix-command flakes";
       http-connections = 50;
       warn-dirty = false;
@@ -97,6 +98,8 @@ in
 
   security.rtkit.enable = true;
 
+  system.nixos.distroName = "BigBoxOS";
+
   services = {
     pipewire = {
       enable = true;
@@ -112,10 +115,11 @@ in
     };
 
     udisks2.enable = true;
+    getty.autologinUser = "bbuser";
     automatic-timezoned.enable = true;
-
-    getty.autologinUser = "bbadmin";
   };
+
+  documentation.nixos.enable = false;
 
   hardware.enableRedistributableFirmware = true;
 
@@ -131,12 +135,11 @@ in
       openssl
       nh
       wget
-      rar
       pavucontrol
       brightnessctl        # Screen/laptop brightness
       killall
       p7zip
-      fzf                  # Fuzzy Finder
+      yazi
 
       htop
       fastfetch            # System stats fetching
@@ -165,7 +168,6 @@ in
       WGETRC = "$XDG_CONFIG_HOME/wgetrc";
     };
   };
-
 
   system.stateVersion = "25.05";
 }

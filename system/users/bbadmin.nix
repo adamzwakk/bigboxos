@@ -8,4 +8,9 @@
       ];
     shell = pkgs.bash;
   };
+
+  home-manager.users.bbadmin = {
+
+    home.stateVersion = "25.05";
+  };
 }
