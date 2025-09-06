@@ -6,8 +6,6 @@
 {
   # Maybe make each its own config file if we have to
   environment.systemPackages = with pkgs; [
-    dosbox-staging         # DOSBox
-    scummvm                # ScummVM
-    vcmi                   # HoMM 3
+    cage                # Kiosk Mode
   ];
 }

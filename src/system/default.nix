@@ -11,9 +11,12 @@
     ./services/networking/iwd.nix
     ./services/networking/networkmanager.nix
 
-    ./runtimes      # Runtimes are always global
+    ./apps/bbos
+    ./apps/runtimes      # Runtimes are always global
 
     ./users/bbadmin.nix
+
+    ./hardware-configuration.nix
   ];
 
   nix = {
@@ -66,9 +69,6 @@
   };
 
   users.defaultUserShell = pkgs.bash;
-
-  documentation.man.generateCaches = true;
-
   fileSystems."/boot".options = [ "fmask=0077" "dmask=0077" ];
 
   fonts = {
