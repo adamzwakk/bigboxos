@@ -11,6 +11,7 @@ let
   allowedRuntimes = {
     scummvm = pkgs.scummvm;
     dosbox = pkgs.dosbox;
+    ecwolf = pkgs.ecwolf
   };
 
   whitelistFile = pkgs.writeText "kiosk-whitelist" (
@@ -29,13 +30,14 @@ let
     mkdir -p "$MOUNTPOINT"
     mount "$DEVICE" "$MOUNTPOINT"
 
-    CONFIG="$MOUNTPOINT/game.ini"
+    CONFIG="$MOUNTPOINT/cart.ini"
 
     if [ -f "$CONFIG" ]; then
         echo "Game cartridge detected: reading configuration..."
 
         # Parse INI
         PROGRAM_ALIAS=$(grep '^program=' "$CONFIG" | cut -d'=' -f2- | tr -d ' ')
+        PROGRAM_CMD=$(grep '^program=' "$CONFIG" | cut -d'=' -f2- | tr -d ' ')
         ARGS=$(grep '^args=' "$CONFIG" | cut -d'=' -f2-)
 
         # Look up alias in whitelist (Nix store paths)
@@ -43,6 +45,9 @@ let
         if [ -z "$PROGRAM" ]; then
             echo "Error: Program '$PROGRAM_ALIAS' not in whitelist!"
         else
+            if [ -z "$PROGRAM_CMD" ]
+              eval "$PROGRAM_CMD"
+            fi
             echo "Launching $PROGRAM with args: $ARGS"
             sudo -u ${kioskUser} "$PROGRAM" $ARGS &
             echo $! > "$PIDFILE"

@@ -1,2 +1,10 @@
 result
 *.qcow2
+
+tools/src/**/*
+tools/src/extracted/**/*
+tools/dist/package/*
+tools/dist/*.zip
+tools/dist/*.img
+
+!**/.gitkeep
