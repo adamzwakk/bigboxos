@@ -11,7 +11,7 @@ let
   allowedRuntimes = {
     scummvm = pkgs.scummvm;
     dosbox = pkgs.dosbox;
-    ecwolf = pkgs.ecwolf
+    ecwolf = pkgs.ecwolf;
   };
 
   whitelistFile = pkgs.writeText "kiosk-whitelist" (
@@ -45,7 +45,7 @@ let
         if [ -z "$PROGRAM" ]; then
             echo "Error: Program '$PROGRAM_ALIAS' not in whitelist!"
         else
-            if [ -z "$PROGRAM_CMD" ]
+            if [ -z "$PROGRAM_CMD" ]; then
               eval "$PROGRAM_CMD"
             fi
             echo "Launching $PROGRAM with args: $ARGS"

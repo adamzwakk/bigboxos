@@ -6,8 +6,10 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     innoextract
     p7zip
-    umu-launcher
     zip
+    unzip
     jq
+    qemu-utils
+    exfatprogs
   ];
 }

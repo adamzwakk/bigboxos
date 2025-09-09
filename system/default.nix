@@ -141,10 +141,11 @@ in
       p7zip
       yazi
 
+      exfat                # exFAT support
       htop
       fastfetch            # System stats fetching
       sysstat
-      lm_sensors # for `sensors` command
+      lm_sensors
       ethtool
       pciutils # lspci
       usbutils # lsusb
