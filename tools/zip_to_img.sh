@@ -1,16 +1,43 @@
 SHORT_NAME="$1"
 IMG_NAME="$1.img"
+IMG_PATH="./dist/$IMG_NAME"
+ZIP_PATH="./dist/$SHORT_NAME.zip"
+MOUNTPOINT="./tmp_usb"
 
-qemu-img create -f raw "./dist/$IMG_NAME" 2G
-mkfs.exfat "./dist/$IMG_NAME"
+if [ ! -f "$ZIP_PATH" ]; then
+    echo "Source zip not found!"
+    exit 1
+fi
 
-mkdir ./tmp_usb
-sudo mount -o loop "./dist/$IMG_NAME" ./tmp_usb
-sudo chmod -R 777 ./tmp_usb
-sudo unzip -qq ./dist/$SHORT_NAME.zip -d ./tmp_usb
-sudo umount ./tmp_usb
-rm -r ./tmp_usb
+# Create 2G raw image
+qemu-img create -f raw "$IMG_PATH" 2G
 
-echo ""
-echo "Add the img to the QEMU monitor with 'drive_add 0 id=usbdisk,file=$(realpath ./dist/$IMG_NAME),format=raw,if=none'"
-echo "Followed by 'device_add usb-storage,drive=usbdisk' to plug it in"
+# Map image to a free loop device
+LOOP=$(sudo losetup -f --show "$IMG_PATH")
+
+# Create a single partition (GPT) covering entire image
+sudo parted "$LOOP" --script mklabel gpt
+sudo parted "$LOOP" --script mkpart primary 1MiB 100%
+
+# Refresh loop device mapping (partition becomes /dev/loopXp1)
+sudo partprobe "$LOOP"
+PARTITION="${LOOP}p1"
+
+# Format partition as exFAT
+sudo mkfs.exfat -n CARTRIDGE "$PARTITION"
+
+# Mount, copy contents
+mkdir -p "$MOUNTPOINT"
+sudo mount "$PARTITION" "$MOUNTPOINT"
+sudo chmod -R 777 "$MOUNTPOINT"
+sudo unzip -qq "$ZIP_PATH" -d "$MOUNTPOINT"
+
+# Unmount and detach loop
+sudo umount "$MOUNTPOINT"
+sudo losetup -d "$LOOP"
+rm -rf "$MOUNTPOINT"
+
+echo "Image ready: $IMG_PATH"
+echo "Add to QEMU with:"
+echo "drive_add 0 id=usbdisk,file=$(realpath $IMG_PATH),format=raw,if=none"
+echo "device_add usb-storage,drive=usbdisk"

@@ -11,5 +11,6 @@ pkgs.mkShell {
     jq
     qemu-utils
     exfatprogs
+    parted
   ];
 }

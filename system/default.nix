@@ -142,6 +142,7 @@ in
       yazi
 
       exfat                # exFAT support
+      exfatprogs
       htop
       fastfetch            # System stats fetching
       sysstat
