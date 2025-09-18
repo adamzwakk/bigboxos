@@ -61,8 +61,9 @@ class MenuForm(npyscreen.FormBaseNew):
         self.menu.display()
 
     def exit_app(self, *args, **keywords):
-        self.parentApp.setNextForm(None)
-        self.editing = False
+        # self.parentApp.setNextForm(None)
+        # self.editing = False
+        exit()
 
 # --- TUI App ---
 class ConsoleMenu(npyscreen.NPSAppManaged):
