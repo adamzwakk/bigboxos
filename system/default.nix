@@ -6,9 +6,12 @@
   ...
 }:
 let
+  kioskUser = "bbuser";
   hardwareconfig = if builtins.pathExists ./hardware-configuration.nix
     then ./hardware-configuration.nix
     else ./vm-hardware.nix;
+
+  consolePython = pkgs.python3.withPackages(ps: with ps; [ npyscreen ]);
 in
 {
   imports = [
@@ -20,7 +23,7 @@ in
     ./apps/runtimes      # Runtimes are always global
 
     ./users/bbadmin.nix
-    ./users/bbuser.nix
+    ./users/${kioskUser}.nix
 
     hardwareconfig
   ];
@@ -38,7 +41,7 @@ in
       trusted-users = ["bbadmin"];
       sandbox = "relaxed";
       auto-optimise-store = true;
-      allowed-users = ["bbadmin" "bbuser"];             # My god it took me hours to realize you need the user here for home manager to work
+      allowed-users = ["bbadmin" "${kioskUser}"];             # My god it took me hours to realize you need the user here for home manager to work
       experimental-features = "nix-command flakes";
       http-connections = 50;
       warn-dirty = false;
@@ -55,6 +58,17 @@ in
     kernelModules = [ "kvm-amd" "sg"];
     kernel.sysctl = { "vm.swappiness" = 20; };
     kernelPackages = pkgs.linuxPackages_zen;
+    kernelParams = [
+      "quiet"
+      "loglevel=3"
+      "rd.systemd.show_status=false"
+      "rd.udev.log_level=3"
+    ];
+
+    plymouth = {
+      enable = true;
+      theme = "spinner"; # or pick "spinner", "fade-in", or a custom one
+    };
 
     loader = {
       systemd-boot.enable = true;
@@ -95,6 +109,7 @@ in
   # My systems never have usable root accounts anyway, so emergency
   # mode just drops into a shell telling me it can't log into root
   systemd.enableEmergencyMode = false;
+  systemd.services."getty@tty1".enable = false;
 
   security.rtkit.enable = true;
 
@@ -140,6 +155,8 @@ in
       killall
       p7zip
       yazi
+
+      consolePython
 
       exfat                # exFAT support
       exfatprogs
